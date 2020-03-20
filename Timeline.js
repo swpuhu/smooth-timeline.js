@@ -21,19 +21,54 @@ class Timeline {
 
 class Track {
     constructor (playList) {
+        this.currentTime = 0;
         this.playList = playList;
         this.medias = [
             document.createElement('video'),
             document.createElement('video'),
         ]
+        this.currentMedias = [];
+        this.requestAnimationFrameId = null;
+        this.play = this.play.bind(this);
     }
 
     get currentMedias() {
 
     }
 
-    play () {
+    findMedia() {
+        let medias = [];
+        for (let i = 0; i < this.playList.length; i++) {
+            let file = this.playList[i];
+            if (this.currentTime >= file.left && this.currentTime < file.end) {
+                medias.push(i);
+            }
+            
+        }
+        return medias;
+    }
 
+    play () {
+        this.requestAnimationFrameId = requestAnimationFrame(this.play);
+        let newFiles = this.findMedia();
+        if (newFiles.length > 1) {
+
+        } else if (newFiles.length > 0) {
+            let newFileIndex = newFiles[0];
+            let currentFileIndex = this.currentMedias[0];
+            if (newFileIndex !== currentFileIndex) {
+                this.currentMedias = newFiles;
+                this.loadNext();
+            }
+            // if (this.medias[this.currentMedias[0] % 2].paused) {
+            //     this.medias[this.currentMedias[0] % 2].play();
+            // }
+        }
+        
+    }
+
+    pause () {
+        this.currentMedias.forEach(media => media.pause());
     }
 
     seek (time) {
@@ -48,38 +83,3 @@ class Track {
 
     }
 }
-
-const timeline = [
-    [
-        {
-            start: 0,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        },
-        {
-            start: 5,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        },
-        {
-            start: 0,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        },
-        {
-            start: 5,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        },
-        {
-            start: 0,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        },
-        {
-            start: 5,
-            end: 10,
-            url: 'http://localhost:9000/assets/4chclip.mp4'
-        }
-    ]
-]
