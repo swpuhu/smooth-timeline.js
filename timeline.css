@@ -1,0 +1,17 @@
+.timeline-container {
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+.timeline-track {
+    position: relative;
+    height: 20px;
+}
+
+.timeline-clip {
+    position: absolute;
+    height: 100%;
+    background-color: rgb(66, 211, 204);
+    border: 1px solid rgb(71, 71, 71);
+    box-sizing: border-box;
+}
