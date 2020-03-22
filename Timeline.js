@@ -1,26 +1,65 @@
 class Timeline {
-    constructor (timeline) {
+    constructor(timeline) {
         this.tracks = timeline.map(track => {
             return new Track(track);
         });
+        this.countTime = this.countTime.bind(this);
+        this._play = this._play.bind(this);
+        this.currentTime = 0;
+        this.prevDate;
+        this.playTimer = null;
     }
 
-    get currentMedias () {
+    get currentMedias() {
 
     }
 
 
-    play () {
-        this.tracks.forEach(track => track.play());
+    play() {
+        let promises = [];
+        this.tracks.forEach(track => {
+            promises.push(track.playReady())
+        });
+        Promise.all(promises)
+            .then(() => {
+                this._play();
+            })
     }
 
-    seek (time) {
-        this.tracks.forEach(track => this.tracks.seek());
+    _play() {
+        this.playTimer = requestAnimationFrame(this._play);
+        let date = Date.now();
+        if (!this.prevDate) {
+            this.prevDate = date;
+        }
+        this.currentTime += (date - this.prevDate) / 1000;
+        console.log(this.currentTime);
+        this.tracks.forEach(track => track._play(this.currentTime));
+        this.prevDate = date;
+    }
+
+    countTime() {
+        requestAnimationFrame(this.countTime);
+        let date = Date.now();
+        if (!this.prevDate) {
+            this.prevDate = data;
+        }
+        this.currentTime += (date - this.prevDate) / 1000;
+    }
+
+    pause() {
+        cancelAnimationFrame(this.playTimer);
+        this.tracks.forEach(track => track.pause());
+    }
+
+    seek(time) {
+        this.currentTime = time;
+        this.tracks.forEach(track => track.seek(time));
     }
 }
 
 class Track {
-    constructor (playList) {
+    constructor(playList) {
         this.currentTime = 0;
         this.playList = playList.map(item => {
             item.duration = item.end - item.start;
@@ -69,7 +108,7 @@ class Track {
         for (let file of files) {
             let promise = this.loadSrc(
                 this.medias[file % 2],
-                this.playList[file].src, 
+                this.playList[file].src,
                 this.playList[file].start
             );
             promises.push(promise);
@@ -84,7 +123,7 @@ class Track {
             if (this.currentTime >= file.left && this.currentTime < file.left + file.duration) {
                 medias.push(i);
             }
-            
+
         }
         return medias;
     }
@@ -105,30 +144,30 @@ class Track {
         return medias;
     }
 
-    play () {
+    play() {
         this.playReady().then(() => {
             this._play();
         })
     }
 
-    _play () {
-        this.requestAnimationFrameId = requestAnimationFrame(this._play);
+    _play(currentTime) {
+        // this.requestAnimationFrameId = requestAnimationFrame(this._play);
         this.isPlaying = true;
-        console.log(this.currentTime);
-        
+
         let date = Date.now();
         if (!this.prevDate) {
             this.prevDate = date;
         }
-        this.currentTime += (date - this.prevDate) / 1000;
-        if (this.currentTime > this.end) {
+        this.currentTime = currentTime;
+        // this.currentTime += (date - this.prevDate) / 1000;
+        if (currentTime > this.end) {
             this.pause();
             console.log('done');
         }
         // console.log(this.currentTime);
-        
-        let newFiles = this.findMedia();
-        
+
+        let newFiles = this.findMedia(currentTime);
+
         if (newFiles.length > 1) {
 
         } else if (newFiles.length > 0) {
@@ -151,13 +190,13 @@ class Track {
         this.prevDate = Date.now();
     }
 
-    pause () {
-        cancelAnimationFrame(this.requestAnimationFrameId);
+    pause() {
+        // cancelAnimationFrame(this.requestAnimationFrameId);
         this.isPlaying = false;
         this.medias.forEach(media => media.pause());
     }
 
-    seek (time) {
+    seek(time) {
         if (this.isPlaying) {
             this.pause();
         }
@@ -174,10 +213,10 @@ class Track {
             // newFiles = this.findNearMedia();
         }
         this.playReady();
-        
+
     }
 
-    init () {
+    init() {
         for (let i = 0; i < this.playList.length; i++) {
             if (i > 1) {
                 break;
@@ -187,7 +226,7 @@ class Track {
         }
     }
 
-    loadNext () {
+    loadNext() {
         let currentFileIndex = this.currentFiles[0];
         if (currentFileIndex >= 0 && currentFileIndex < this.playList.length) {
             let media = this.medias[currentFileIndex % 2];
@@ -200,54 +239,13 @@ class Track {
                 media.currentTime = this.playList[currentFileIndex + 2].start;
             }
         }
-        
+
     }
 
-    _showVideo () {
+    _showVideo() {
         this.medias.forEach(media => {
             document.body.appendChild(media);
         })
     }
 }
 
-
-const test = [
-    {
-        left: 0,
-        start: 0,
-        end: 2,
-        src: 'http://localhost:9000/assets/ad1.mp4'
-    },
-    {
-        left: 5,
-        start: 5,
-        end: 18,
-        src: 'http://localhost:9000/assets/jiangye1.mp4'
-    },
-    {
-        left: 18,
-        start: 0,
-        end: 2,
-        src: 'http://localhost:9000/assets/ad1.mp4'
-    },
-    {
-        left: 20,
-        start: 5,
-        end: 8,
-        src: 'http://localhost:9000/assets/ad2.mp4'
-    },
-    {
-        left: 25,
-        start: 5,
-        end: 7,
-        src: 'http://localhost:9000/assets/ad1.mp4'
-    },
-    {
-        left: 27,
-        start: 60,
-        end: 90,
-        src: 'http://localhost:9000/assets/jiangye2.mp4'
-    }
-]
-
-let track = new Track(test);
