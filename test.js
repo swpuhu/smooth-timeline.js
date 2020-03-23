@@ -91,3 +91,19 @@ const test = [
 ]
 
 let timeline = new Timeline(test);
+
+let playButton = document.createElement('button');
+playButton.textContent = 'Play';
+
+playButton.onclick = function () {
+    timeline.play();
+}
+let pauseButton = document.createElement('button');
+pauseButton.textContent = 'Pause';
+pauseButton.onclick = function () {
+    timeline.pause();
+}
+
+document.body.appendChild(playButton);
+document.body.appendChild(pauseButton);
+

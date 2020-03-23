@@ -204,4 +204,9 @@ class Track {
             document.body.appendChild(media);
         })
     }
+
+    get currentMedias() {
+        let medias = this.findMedia();
+        return medias.map(index => this.medias[index % 2]);
+    }
 }
