@@ -18,6 +18,7 @@ class Timeline {
         this.playTimer = null;
         this.pointer;
         this.perSecondWidth = 10;
+        this.isFirst = true;
         let canvas = document.createElement('canvas');
         canvas.width = 640;
         canvas.height = 360;
@@ -58,17 +59,20 @@ class Timeline {
             this.pause();
         }
         let date = Date.now();
-        if (!this.prevDate) {
+        if (this.isFirst) {
             this.prevDate = date;
         }
         this.currentTime += (date - this.prevDate) / 1000;
+        console.log(this.currentTime);
+        
         let videos = [];
         this.tracks.forEach(track => {
-            track._play(this.currentTime)
+            track._play(this.currentTime);
             videos.push(...track.currentMedias);
         });
-        this.renderer.render(videos[0])
+        this.renderer.render(videos)
         this.prevDate = date;
+        this.isFirst = false;
     }
 
     countTime() {
@@ -81,13 +85,22 @@ class Timeline {
     }
 
     pause() {
+        this.isFirst = true;
         cancelAnimationFrame(this.playTimer);
         this.tracks.forEach(track => track.pause());
     }
 
     seek(time) {
         this.currentTime = time;
-        this.tracks.forEach(track => track.seek(time));
+        let seekPromises = [];
+        let videos = [];
+        this.tracks.forEach(track => {
+            videos.push(...track.currentMedias);
+            seekPromises.push(track.seek(time));
+        });
+        Promise.all(seekPromises).then(() => {
+            this.renderer.render(videos);
+        })
     }
 
     _visualizeTimeline (container) {

@@ -169,8 +169,7 @@ class Track {
         } else {
             // newFiles = this.findNearMedia();
         }
-        this.playReady();
-
+        return this.playReady();
     }
 
     init() {

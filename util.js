@@ -903,14 +903,14 @@ function createUniformSetters (gl, program) {
             // }(getBindPointForSamplerType(gl, type), units);
         }
         if (type === gl.SAMPLER_2D || type === gl.SAMPLER_CUBE) {
-            return function(){}
-            // return function (bindPoint, unit) {
-            //     return function (texture) {
-            //         gl.uniform1i(location, unit);
-            //         gl.activeTexture(gl.TEXTURE0 + unit);
-            //         gl.bindTexture(bindPoint, texture);
-            //     };
-            // }(getBindPointForSamplerType(gl, type), textureUnit++);
+            // return function(){}
+            return function (bindPoint, unit) {
+                return function (texture) {
+                    gl.uniform1i(location, unit);
+                    gl.activeTexture(gl.TEXTURE0 + unit);
+                    gl.bindTexture(bindPoint, texture);
+                };
+            }(getBindPointForSamplerType(gl, type), textureUnit++);
         }
         throw ('unknown type: 0x' + type.toString(16)); // we should never get here.
     }
@@ -933,6 +933,12 @@ function createUniformSetters (gl, program) {
     }
     return uniformSetters;
 }
+
+function getBindPointForSamplerType(gl, type) {
+    if (type === gl.SAMPLER_2D)   return gl.TEXTURE_2D;        // eslint-disable-line
+    if (type === gl.SAMPLER_CUBE) return gl.TEXTURE_CUBE_MAP;  // eslint-disable-line
+    return undefined;
+  }
 
 
 function createAttributeSetters (gl, program) {
@@ -989,6 +995,20 @@ function scalePoint (x, y, scaleX, scaleY, center) {
     ]
 }
 
+
+ function createFramebufferTexture (gl, number, framebuffers, textures, width, height) {
+    for (let i = 0; i < number; i++) {
+        let framebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+        gl.viewport(0, 0, width, height);
+        let texture = createTexture(gl);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+        textures.push(texture);
+        framebuffers.push(framebuffer);
+    }
+};
+
 const util = {
     initWebGL,
     createProjection,
@@ -1021,5 +1041,6 @@ const util = {
     setUniforms,
     setAttributes,
     generateTrianglesByLines,
-    scalePoint
+    scalePoint,
+    createFramebufferTexture
 }

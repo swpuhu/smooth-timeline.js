@@ -4,8 +4,8 @@ const test = [
         {
             left: 0,
             start: 0,
-            end: 2,
-            src: 'http://localhost:9000/assets/ad1.mp4'
+            end: 5,
+            src: 'http://localhost:9000/assets/ad2.mp4'
         },
         {
             left: 5,
