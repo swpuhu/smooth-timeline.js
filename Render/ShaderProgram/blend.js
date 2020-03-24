@@ -32,12 +32,12 @@ class BlendProgram {
     void main () {
         vec4 color1 = texture2D(u_texture1, v_texCoord);
         vec4 color2 = texture2D(u_texture2, v_texCoord);
-        color1.a = 0.5;
-        color2.a = 0.5;
-        // gl_FragColor = vec4(color1.rgb * color2.rgb, 1.0);
-        // gl_FragColor = vec4(color2.rgb * color2.a + color1.rgb * (1.0 - color2.a), 1.0 - (1.0 - color1.a) * (1.0 - color2.a));
-        // gl_FragColor = color2;
-        gl_FragColor = vec4(color2.rgb * color2.a + color1.rgb * (1.0 - color2.a), color1.a + color2.a);
+        if (v_texCoord.x < 0.5) {
+            gl_FragColor = color1;
+        } else {
+            gl_FragColor = color2;
+        }
+        // gl_FragColor = vec4(color2.rgb * color2.a + color1.rgb * (1.0 - color2.a), color1.a + color2.a);
     }
 `
         this.gl = gl;

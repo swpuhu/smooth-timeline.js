@@ -1009,6 +1009,19 @@ function scalePoint (x, y, scaleX, scaleY, center) {
     }
 };
 
+
+function throttle (fn, delay = 50) {
+    let self = this;
+    let timer = null;
+    return function () {
+        if (timer) return;
+        timer = setTimeout(() => {
+            clearTimeout(timer);
+            timer = null;
+            fn.apply(self, arguments);
+        }, delay);
+    }
+}
 const util = {
     initWebGL,
     createProjection,

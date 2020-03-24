@@ -1,6 +1,7 @@
 
 class Track {
-    constructor(playList) {
+    constructor(playList, type = 'Video') {
+        this.type = type;
         this.currentTime = 0;
         this.playList = playList.map(item => {
             item.duration = item.end - item.start;
@@ -8,9 +9,16 @@ class Track {
         });
         this.end = this.playList[this.playList.length - 1].left + this.playList[this.playList.length - 1].duration;
         this.medias = [
-            document.createElement('video'),
-            document.createElement('video'),
+            document.createElement( type === 'Video' ? 'video' : 'audio'),
+            document.createElement( type === 'Video' ? 'video' : 'audio')
         ];
+
+        this.medias.forEach(media => {
+            if (type === 'Video') {
+                media.muted = true;
+            }
+            media.controls = true;
+        })
         this.medias.forEach(media => {
             media.width = 320;
             media.height = 180;
