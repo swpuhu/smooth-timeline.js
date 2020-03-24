@@ -143,18 +143,18 @@ const test = [
     }
 ]
 
-let timeline = new TimelinePlayer(test);
+let timelinePlayer = new TimelinePlayer(test);
 
 let playButton = document.createElement('button');
 playButton.textContent = 'Play';
 
 playButton.onclick = function () {
-    timeline.play();
+    timelinePlayer.play();
 }
 let pauseButton = document.createElement('button');
 pauseButton.textContent = 'Pause';
 pauseButton.onclick = function () {
-    timeline.pause();
+    timelinePlayer.pause();
 }
 
 document.body.appendChild(playButton);
@@ -162,14 +162,22 @@ document.body.appendChild(pauseButton);
 
 document.addEventListener('keydown', throttle(function (e) {
     if (e.key === ' ') {
-        if (timeline.isPlaying) {
-            timeline.pause();
+        if (timelinePlayer.isPlaying) {
+            timelinePlayer.pause();
         } else {
-            timeline.play();
+            timelinePlayer.play();
         }
-    } else if (e.key === 'ArrowLeft' && !timeline.isPlaying) {
-        timeline.seek(timeline.currentTime - 0.04);
-    } else if (e.key === 'ArrowRight' && !timeline.isPlaying) {
-        timeline.seek(timeline.currentTime + 0.04);
+    } else if (e.key === 'ArrowLeft' && !timelinePlayer.isPlaying) {
+        timelinePlayer.seek(timelinePlayer.currentTime - 0.04);
+    } else if (e.key === 'ArrowRight' && !timelinePlayer.isPlaying) {
+        timelinePlayer.seek(timelinePlayer.currentTime + 0.04);
     }
 }));
+
+let timeline = new Timeline({
+    Video: 1,
+    Audio: 2,
+    CG: 2
+});
+
+document.body.appendChild(timeline.ref);

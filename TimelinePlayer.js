@@ -3,7 +3,7 @@ class TimelinePlayer {
         let maxEnd = 0;
         this.timeline = timeline;
         this.tracks = timeline.map(item => {
-            let track = new Track(item.clips, item.type);
+            let track = new Stream(item.clips, item.type);
             if (track.end > maxEnd) {
                 maxEnd = track.end;
             }
@@ -24,7 +24,7 @@ class TimelinePlayer {
         canvas.width = 640;
         canvas.height = 360;
         document.body.appendChild(canvas);
-        this._visualizeTimeline(document.body);
+        // this._visualizeTimeline(document.body);
         this.renderer = new Renderer(canvas);
     }
 

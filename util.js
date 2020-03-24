@@ -1022,6 +1022,115 @@ function throttle (fn, delay = 50) {
         }, delay);
     }
 }
+
+function generateDOM(t) {
+    function createElement(tagName, isSVG, classList, text, title, attributes, props, styles) {
+        let doc;
+        if (isSVG) {
+            doc = document.createElementNS('http://www.w3.org/2000/svg', tagName);
+        } else {
+            doc = document.createElement(tagName);
+        }
+        
+        if (attributes) {
+            for (let key in attributes) {
+                doc.setAttribute(key, attributes[key]);
+            }
+        }
+
+        if (props) {
+            for (let prop in props) {
+                doc[prop] = props[prop];
+            }
+        }
+
+        
+
+        if (styles) {
+            for (let style in styles) {
+                doc.style[style] = styles[style];
+            }
+        }
+
+        if (classList) {
+
+            if (typeof classList === 'string') {
+                doc.classList.add(classList);
+            } else {
+                for (let className of classList) {
+                    doc.classList.add(className);
+                }
+            }
+
+        }
+        if (text) {
+            doc.textContent = text;
+        }
+
+
+        if (title) {
+            doc.title = title;
+        }
+
+        return doc;
+    }
+    let queue = [];
+    let parentDOM;
+    queue.push({
+        parentDOM: null,
+        template: t
+    });
+    let refs = {};
+    let isSVG = false;
+    if (t.tagName === 'svg') {
+        isSVG = true;
+    }
+    while (queue.length) {
+        let current = queue.shift();
+        let dom;
+        if (!current.template) continue;
+        if (current.template.component) {
+            if (current.template.component instanceof HTMLElement) {
+                dom = current.template.component;
+            } else {
+                dom = current.template.component.ref;
+            }
+            
+            if (current.template.ref) {
+                refs[current.template.ref] = dom;
+            }
+        } else {
+            dom = createElement(
+                current.template.tagName, isSVG, current.template.classList, 
+                current.template.text, current.template.title, current.template.attributes, 
+                current.template.props, current.template.styles
+                );
+            if (current.template.ref) {
+                refs[current.template.ref] = dom;
+            }
+        }
+
+        if (current.parentDOM) {
+            current.parentDOM.appendChild(dom);
+        } else {
+            parentDOM = dom;
+        }
+        if (current.template.children) {
+            for (let child of current.template.children) {
+                queue.push({
+                    parentDOM: dom,
+                    template: child
+                })
+            }
+        }
+
+    }
+    refs = {
+        ...refs,
+        root: parentDOM
+    }
+    return refs;
+}
 const util = {
     initWebGL,
     createProjection,
@@ -1055,5 +1164,6 @@ const util = {
     setAttributes,
     generateTrianglesByLines,
     scalePoint,
-    createFramebufferTexture
+    createFramebufferTexture,
+    generateDOM
 }

@@ -1,5 +1,5 @@
 
-class Track {
+class Stream {
     constructor(playList, type = 'Video') {
         this.type = type;
         this.currentTime = 0;

@@ -19,7 +19,22 @@ body {
 
 .timeline-track {
     position: relative;
-    height: 20px;
+    height: 50px;
+    background-color: #ccc;
+    border-bottom: 1px solid #000;
+}
+
+
+.timeline-track.video-track {
+    background-color: rgb(84, 197, 197);
+}
+
+.timeline-track.cg-track {
+    background-color: rgb(197, 190, 84);
+}
+
+.timeline-track.audio-track {
+    background-color: rgb(84, 197, 90);
 }
 
 .timeline-clip {
