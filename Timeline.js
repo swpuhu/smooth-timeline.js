@@ -8,13 +8,13 @@ class Timeline {
         this.zoom = 1;
         this.allTime = 0;
         for (let i = 0; i < Video; i++) {
-            this.videoTracks.push(new VideoTrack());
+            this.videoTracks.push(new VideoTrack(this));
         }
         for (let i = 0; i < Audio; i++) {
-            this.audioTracks.push(new AudioTrack());
+            this.audioTracks.push(new AudioTrack(this));
         }
         for (let i = 0; i < CG; i++) {
-            this.cgTracks.push(new CGTrack());
+            this.cgTracks.push(new CGTrack(this));
         }   
         this.ref = this._render();
     }
@@ -50,12 +50,13 @@ class Timeline {
 }
 
 class Track {
-    constructor() {
-
+    constructor(timeline) {
+        console.log(timeline);
+        this.clips = [];
     }
 
-    addClip() {
-
+    addClip(clip) {
+        this.clips.push(clip);
     }
 
     removeClip(index) {
@@ -65,8 +66,18 @@ class Track {
 
 class VideoTrack extends Track {
     constructor() {
-        super();
+        super(...arguments);
         this.ref = this._render();
+        this.video = document.createElement('video');
+    }
+
+    /**
+     * 
+     * @param {VideoClip} clip 
+     */
+    addClip (clip) {
+        super.addClip(clip);
+        this.ref.appendChild(clip.ref);
     }
 
     _render() {
@@ -75,13 +86,33 @@ class VideoTrack extends Track {
             classList: ['video-track', 'timeline-track'],
             children: []
         });
+
+        root.ondragover = (e) => {
+            return false;
+        };
+        root.ondrop = (e) => {
+            e.preventDefault();
+            console.log(e.dataTransfer.files);
+            let file = e.dataTransfer.files[0];
+            if (file) {
+                let url = URL.createObjectURL(file);
+                this.video.onloadedmetadata = function (e) {
+                    URL.revokeObjectURL(url);
+                    let time = e.timeStamp;
+                    let clip = new Clip(0, 0, );
+                }
+                this.video.src = url;
+                
+
+            }
+        }
         return root;
     }
 }
 
 class AudioTrack extends Track {
     constructor() {
-        super();
+        super(...arguments);
         this.ref = this._render();
     }
 
@@ -97,7 +128,7 @@ class AudioTrack extends Track {
 
 class CGTrack extends Track {
     constructor() {
-        super();
+        super(...arguments);
         this.ref = this._render();
     }
 
@@ -112,19 +143,39 @@ class CGTrack extends Track {
 }
 
 class Clip {
-    constructor() {
-
+    constructor(left = 0, start = 0, end, duration, totalDuration) {
+        this.left = left;
+        this.start = start;
+        this.end = end;
+        this.duration = duration;
+        this.totalDuration = totalDuration;
     }
+
+    
 }
 
 class VideoClip extends Clip {
-
+    constructor (left, start, end, duration, totalDuration, isMute) {
+        super(...arguments);
+        this.isMute = isMute;
+    }
+    get playbackRate () {
+        return (this.end - this.start) / this.duration;
+    }
 }
 
 class AudioClip extends Clip {
-
+    constructor (left, start, end, duration, totalDuration, isMute, channel) {
+        super(...arguments);
+        this.channel = channel;
+        this.isMute = isMute;
+    }
 }
 
 class CGClip extends Clip {
-
+    constructor (left, start, end, duration, totalDuration) {
+        super(...arguments)
+    }
 }
+
+
