@@ -26,15 +26,15 @@ body {
 
 
 .timeline-track.video-track {
-    background-color: rgb(84, 197, 197);
+    /* background-color: rgb(84, 197, 197); */
 }
 
 .timeline-track.cg-track {
-    background-color: rgb(197, 190, 84);
+    /* background-color: rgb(197, 190, 84); */
 }
 
 .timeline-track.audio-track {
-    background-color: rgb(84, 197, 90);
+    /* background-color: rgb(84, 197, 90); */
 }
 
 .timeline-clip {
@@ -43,4 +43,8 @@ body {
     background-color: rgb(66, 211, 204);
     border: 1px solid rgb(71, 71, 71);
     box-sizing: border-box;
+}
+.timeline-track.video-track .clip {
+    background-color:  rgb(41, 238, 238);
+    height: 100%;
 }

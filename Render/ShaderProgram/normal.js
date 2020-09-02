@@ -28,9 +28,30 @@ class NormalProgram {
     precision mediump float;
     varying vec2 v_texCoord;
     uniform sampler2D u_texture;
+    uniform mat4 m;
     void main () {
-        gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
-        gl_FragColor = texture2D(u_texture, v_texCoord);
+        float l, r, t, b;
+        l = 0.1;
+        r = 0.8;
+        t = 0.1;
+        b = 0.8;
+        vec2 pos = v_texCoord;
+        float angle = 0.2;
+        float cos = cos(angle);
+        float sin = sin(angle);
+        float x = v_texCoord.x;
+        float y = v_texCoord.y;
+        // pos.x = x * cos - y * sin;
+        // pos.y = x * sin + y * cos;
+        pos = (m * gl_FragCoord).xy / vec2(640., 360.);
+        if (pos.x < l || pos.x > 1. || pos.y < 0. || pos.y > 1.) {
+            gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+            // gl_FragColor = texture2D(u_texture, pos);
+        } else {
+            gl_FragColor = texture2D(u_texture, v_texCoord);
+        }
+        
+        
     }
 `
         this.gl = gl;
@@ -52,10 +73,13 @@ class NormalProgram {
                 offset: 0
             }
         }
-
+        let angle = 30 / 180 * Math.PI;
+        let cos = Math.cos(angle);
+        let sin = Math.sin(angle);
         this.uniforms = {
             u_disableY: 0,
-            u_projection: util.createProjection(this.gl.canvas.width, this.gl.canvas.height, 1)
+            u_projection: util.createProjection(this.gl.canvas.width, this.gl.canvas.height, 1),
+            m: util.createRotateMatrix({x: 320, y: 180}, 10, 'z')
         }
         util.setAttributes(this.attribSetter, this.attributes);
         util.setUniforms(this.uniformSetter, this.uniforms);

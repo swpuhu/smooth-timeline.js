@@ -1022,16 +1022,15 @@ function throttle (fn, delay = 50) {
         }, delay);
     }
 }
-
-function generateDOM(t) {
-    function createElement(tagName, isSVG, classList, text, title, attributes, props, styles) {
+function generateDOM (t) {
+    function createElement (tagName, isSVG, classList, text, title, attributes, props, styles, events) {
         let doc;
         if (isSVG) {
             doc = document.createElementNS('http://www.w3.org/2000/svg', tagName);
         } else {
             doc = document.createElement(tagName);
         }
-        
+
         if (attributes) {
             for (let key in attributes) {
                 doc.setAttribute(key, attributes[key]);
@@ -1044,11 +1043,17 @@ function generateDOM(t) {
             }
         }
 
-        
+
 
         if (styles) {
             for (let style in styles) {
                 doc.style[style] = styles[style];
+            }
+        }
+
+        if (events) {
+            for (let event in events) {
+                doc.addEventListener(event, events[event]);
             }
         }
 
@@ -1095,16 +1100,16 @@ function generateDOM(t) {
             } else {
                 dom = current.template.component.ref;
             }
-            
+
             if (current.template.ref) {
                 refs[current.template.ref] = dom;
             }
         } else {
             dom = createElement(
-                current.template.tagName, isSVG, current.template.classList, 
-                current.template.text, current.template.title, current.template.attributes, 
-                current.template.props, current.template.styles
-                );
+                current.template.tagName, isSVG, current.template.classList,
+                current.template.text, current.template.title, current.template.attributes,
+                current.template.props, current.template.styles, current.template.events
+            );
             if (current.template.ref) {
                 refs[current.template.ref] = dom;
             }
@@ -1131,6 +1136,7 @@ function generateDOM(t) {
     }
     return refs;
 }
+
 const util = {
     initWebGL,
     createProjection,

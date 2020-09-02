@@ -172,7 +172,7 @@ document.addEventListener('keydown', throttle(function (e) {
     } else if (e.key === 'ArrowRight' && !timelinePlayer.isPlaying) {
         timelinePlayer.seek(timelinePlayer.currentTime + 0.04);
     }
-}));
+}, 50));
 
 let timeline = new Timeline({
     Video: 1,

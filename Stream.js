@@ -116,6 +116,7 @@ class Stream {
 
     _play(currentTime) {
         // this.requestAnimationFrameId = requestAnimationFrame(this._play);
+        // console.log(currentTime);
         this.isPlaying = true;
 
         let date = Date.now();

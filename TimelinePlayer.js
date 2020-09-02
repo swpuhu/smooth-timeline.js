@@ -24,7 +24,7 @@ class TimelinePlayer {
         canvas.width = 640;
         canvas.height = 360;
         document.body.appendChild(canvas);
-        // this._visualizeTimeline(document.body);
+        this._visualizeTimeline(document.body);
         this.renderer = new Renderer(canvas);
     }
 
@@ -44,13 +44,14 @@ class TimelinePlayer {
     }
 
     play() {
+        if (this.isPlaying) return;
         let promises = [];
         this.tracks.forEach(track => {
             promises.push(track.playReady())
         });
-        this.isPlaying = true;
         Promise.all(promises)
             .then(() => {
+                this.isPlaying = true;
                 this._play();
             })
     }
@@ -65,7 +66,8 @@ class TimelinePlayer {
             this.prevDate = date;
         }
         this.currentTime += (date - this.prevDate) / 1000;
-        console.log(this.currentTime);
+        // console.log(this.currentTime);
+        
         
         let videos = [];
         this.tracks.forEach(track => {
@@ -74,6 +76,9 @@ class TimelinePlayer {
                 videos.push(...track.currentMedias);
             }
         });
+        // videos.forEach(video => {
+        //     console.log(video.currentTime);
+        // })
         this.renderer.render(videos)
         this.prevDate = date;
         this.isFirst = false;
@@ -100,7 +105,10 @@ class TimelinePlayer {
         let seekPromises = [];
         let videos = [];
         this.tracks.forEach(track => {
-            videos.push(...track.currentMedias);
+
+            if (track.type === 'Video') {
+                videos.push(...track.currentMedias);
+            }
             seekPromises.push(track.seek(time));
         });
         Promise.race(seekPromises).then(() => {

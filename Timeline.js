@@ -4,9 +4,11 @@ class Timeline {
         this.videoTracks = [];
         this.audioTracks = [];
         this.cgTracks = [];
-        this.perFrameWidth = 20;
-        this.zoom = 1;
+        this.initPerFrameWidth = 20;
+        this.zoom = 20;
+        this.perFrameWidth = this.initPerFrameWidth / this.zoom;
         this.allTime = 0;
+        this.frameRate = 25;
         for (let i = 0; i < Video; i++) {
             this.videoTracks.push(new VideoTrack(this));
         }
@@ -15,21 +17,64 @@ class Timeline {
         }
         for (let i = 0; i < CG; i++) {
             this.cgTracks.push(new CGTrack(this));
-        }   
+        }
         this.ref = this._render();
     }
 
     _render() {
         let { root } = util.generateDOM({
+
             tagName: 'div',
             classList: ['timeline-container'],
             children: [
-                ...this.cgTracks.map(item => { return { component: item } }),
-                ...this.videoTracks.map(item => { return { component: item } }),
-                ...this.audioTracks.map(item => { return { component: item } }),
+                {
+                    tagName: 'div',
+                    classList: ['container'],
+                    children: [
+                        ...this.cgTracks.map(item => { return { component: item } }),
+                        ...this.videoTracks.map(item => { return { component: item } }),
+                        ...this.audioTracks.map(item => { return { component: item } }),
+
+                    ]
+                },
+                {
+                    tagName: 'button',
+                    classList: ['zoom-add'],
+                    text: '+',
+                    events: {
+                        'click': () => {
+                            this.zoom += 5;
+                            this.changeZoom();
+                        }
+                    }
+                },
+                {
+                    tagName: 'button',
+                    classList: ['zoom-minus'],
+                    text: '-',
+                    events: {
+                        'click': () => {
+                            this.zoom -= 5;
+                            this.changeZoom();
+                        }
+                    }
+                }
             ]
         });
         return root;
+    }
+
+    get allTracks() {
+        return [...this.videoTracks, ...this.audioTracks, ...this.cgTracks];
+    }
+
+    changeZoom () {
+        this.perFrameWidth = this.initPerFrameWidth / this.zoom;
+        this.allTracks.forEach(track => {
+            track.clips.forEach(clip => {
+                clip.update();
+            })
+        });
     }
 
     addTrack(type) {
@@ -51,8 +96,9 @@ class Timeline {
 
 class Track {
     constructor(timeline) {
-        console.log(timeline);
+        this.timeline = timeline;
         this.clips = [];
+        this.ref;
     }
 
     addClip(clip) {
@@ -75,7 +121,7 @@ class VideoTrack extends Track {
      * 
      * @param {VideoClip} clip 
      */
-    addClip (clip) {
+    addClip(clip) {
         super.addClip(clip);
         this.ref.appendChild(clip.ref);
     }
@@ -96,13 +142,21 @@ class VideoTrack extends Track {
             let file = e.dataTransfer.files[0];
             if (file) {
                 let url = URL.createObjectURL(file);
-                this.video.onloadedmetadata = function (e) {
+                this.video.onloadedmetadata = (e) => {
                     URL.revokeObjectURL(url);
-                    let time = e.timeStamp;
-                    let clip = new Clip(0, 0, );
+                    let time = this.video.duration;
+                    let frame = this.video.duration * this.timeline.frameRate;
+                    let clip = new VideoClip({
+                        left: 0,
+                        start: 0,
+                        duration: frame,
+                        end: frame,
+                        totalDuration: frame,
+                        track: this
+                    });
+                    this.addClip(clip);
                 }
                 this.video.src = url;
-                
 
             }
         }
@@ -143,29 +197,48 @@ class CGTrack extends Track {
 }
 
 class Clip {
-    constructor(left = 0, start = 0, end, duration, totalDuration) {
+    constructor({ left = 0, start = 0, end, duration, totalDuration, track }) {
         this.left = left;
         this.start = start;
         this.end = end;
         this.duration = duration;
         this.totalDuration = totalDuration;
+        this.track = track;
+        this.ref;
     }
 
-    
+    update() {
+        this.ref.style.left = this.left * this.track.timeline.perFrameWidth + 'px';
+        this.ref.style.width = this.duration * this.track.timeline.perFrameWidth + 'px';
+    }
+
 }
 
 class VideoClip extends Clip {
-    constructor (left, start, end, duration, totalDuration, isMute) {
-        super(...arguments);
+    constructor({ left, start, end, duration, totalDuration, isMute, track }) {
+        super({ left, start, end, duration, totalDuration, track });
         this.isMute = isMute;
+        this.ref = this._render();
     }
-    get playbackRate () {
+    get playbackRate() {
         return (this.end - this.start) / this.duration;
+    }
+
+    _render() {
+        let { root } = util.generateDOM({
+            tagName: 'div',
+            classList: ['clip'],
+            styles: {
+                left: this.left * this.track.timeline.perFrameWidth + 'px',
+                width: this.duration * this.track.timeline.perFrameWidth + 'px'
+            }
+        });
+        return root;
     }
 }
 
 class AudioClip extends Clip {
-    constructor (left, start, end, duration, totalDuration, isMute, channel) {
+    constructor(left, start, end, duration, totalDuration, isMute, channel) {
         super(...arguments);
         this.channel = channel;
         this.isMute = isMute;
@@ -173,7 +246,7 @@ class AudioClip extends Clip {
 }
 
 class CGClip extends Clip {
-    constructor (left, start, end, duration, totalDuration) {
+    constructor(left, start, end, duration, totalDuration) {
         super(...arguments)
     }
 }
